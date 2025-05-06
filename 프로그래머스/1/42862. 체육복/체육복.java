@@ -9,12 +9,14 @@ class Solution {
         Arrays.sort(lost);
         Arrays.sort(reserve);
         
-        Set<Integer> owns = Arrays.stream(lost)
-                        .boxed()
-                        .collect(Collectors.toSet());
-        owns.retainAll(Arrays.stream(reserve)
-                      .boxed()
-                      .collect(Collectors.toSet()));
+        Set<Integer> owns = new HashSet<>();
+        for(int l : lost) {
+            for(int r : reserve) {
+                if(l==r) {
+                    owns.add(l);
+                }
+            }
+        }
         
         Queue<Integer> q = new LinkedList<>();
         for(int l : lost) q.add(l);
