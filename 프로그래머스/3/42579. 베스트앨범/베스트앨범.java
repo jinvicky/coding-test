@@ -3,52 +3,38 @@ import java.lang.*;
 
 class Solution {
     public int[] solution(String[] genres, int[] plays) {
-        Map<String, Integer> map = new HashMap<>();
+        
+        Map<String, Integer> genreTotal = new HashMap<>();
+        Map<String, List<int[]>> genreSongs = new HashMap<>();
+        
         for(int i = 0; i < genres.length; i++) {
-            map.put(genres[i], map.getOrDefault(genres[i], 0) + plays[i]);
+            genreTotal.put(genres[i], 
+                          genreTotal.getOrDefault(genres[i], 0) + plays[i]);
+            
+            genreSongs
+                .computeIfAbsent(genres[i], k -> new ArrayList<>())
+                .add(new int[]{i, plays[i]});
         }
         
-        ArrayList<String> genre = new ArrayList<>();
-        for(String key: map.keySet()) {
-            genre.add(key);
-        }
+        List<String> genreOrder = new ArrayList<>(genreTotal.keySet());
+        genreOrder.sort((a,b) -> genreTotal.get(b) - genreTotal.get(a));
         
-        Collections.sort(genre, (o1, o2)-> map.get(o2) - map.get(o1));
+        List<Integer> answer = new ArrayList<>();
         
-        ArrayList<Integer> list = new ArrayList<>();
-        for(int i = 0; i < genre.size(); i++) {
-            String g = genre.get(i);
+        for (String genre : genreOrder) {
+            List<int[]> songs = genreSongs.get(genre);
             
-            int max = 0; 
-            int firstIdx = -1;
-            for(int j = 0; j < genres.length; j++) {
-                if(g.equals(genres[j]) && max < plays[j]) {
-                    max = plays[j];
-                    firstIdx = j;
-                }
-            }
+            songs.sort((a,b) -> {
+                if(b[1] != a[1]) return b[1] - a[1];
+                return a[0] - b[0];
+            });
             
-            max = 0; 
-            int secondIdx = -1;
-            for(int j = 0; j < genres.length; j++) {
-                if(g.equals(genres[j]) && max < plays[j] && j != firstIdx) {
-                    max = plays[j];
-                    secondIdx = j;
-                }
-            }
-            
-            list.add(firstIdx);
-            if(secondIdx >= 0) {
-                list.add(secondIdx);
+            answer.add(songs.get(0)[0]);
+            if(songs.size() > 1) {
+                answer.add(songs.get(1)[0]);
             }
         }
         
-        int[] result = new int[list.size()];
-        for(int i = 0; i <list.size(); i++) {
-            result[i] = list.get(i);
-        }
-        
-      
-        return result;
+        return answer.stream().mapToInt(i -> i).toArray();
     }
 }
